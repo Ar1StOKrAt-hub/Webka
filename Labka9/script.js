@@ -4,31 +4,27 @@
 // 1. UI ЛОГІКА (Таби, Глазик, Вибір міст)
 // ==========================================
 
-// --- Перемикання табів (Signup / Login) ---
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
 
 tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-        // Знімаємо активний клас з усіх
         tabBtns.forEach(b => b.classList.remove('active'));
         tabContents.forEach(c => c.classList.remove('active'));
         
-        // Додаємо активний клас натиснутому
         btn.classList.add('active');
         const targetId = btn.getAttribute('data-target');
         document.getElementById(targetId).classList.add('active');
     });
 });
 
-// --- Показати/Сховати пароль (Глазик) ---
 const togglePasswords = document.querySelectorAll('.toggle-password');
 togglePasswords.forEach(icon => {
     icon.addEventListener('click', function() {
-        const input = this.previousElementSibling; // Знаходимо input перед глазиком
+        const input = this.previousElementSibling; 
         if (input.type === 'password') {
             input.type = 'text';
-            this.textContent = '🙈'; // Змінюємо іконку
+            this.textContent = '🙈'; 
         } else {
             input.type = 'password';
             this.textContent = '👁️';
@@ -36,7 +32,6 @@ togglePasswords.forEach(icon => {
     });
 });
 
-// --- Залежні списки (Країна -> Місто) ---
 const countrySelect = document.getElementById('country');
 const citySelect = document.getElementById('city');
 
@@ -49,10 +44,10 @@ const citiesMap = {
 if (countrySelect && citySelect) {
     countrySelect.addEventListener('change', function() {
         const selectedCountry = this.value;
-        citySelect.innerHTML = '<option value="">Choose city...</option>'; // Очищаємо старі міста
+        citySelect.innerHTML = '<option value="">Choose city...</option>'; 
         
         if (selectedCountry && citiesMap[selectedCountry]) {
-            citySelect.disabled = false; // Розблоковуємо поле
+            citySelect.disabled = false; 
             citiesMap[selectedCountry].forEach(city => {
                 const option = document.createElement('option');
                 option.value = city.toLowerCase();
@@ -60,7 +55,7 @@ if (countrySelect && citySelect) {
                 citySelect.appendChild(option);
             });
         } else {
-            citySelect.disabled = true; // Блокуємо, якщо країну не обрано
+            citySelect.disabled = true; 
         }
     });
 }
@@ -69,11 +64,10 @@ if (countrySelect && citySelect) {
 // 2. ЛОГІКА ВАЛІДАЦІЇ ТА ВІДПРАВКИ
 // ==========================================
 
-// Функції перевірки (RegEx та інші правила)
 const validators = {
     name: (val) => {
         if (val.length < 3 || val.length > 15) return 'Має бути від 3 до 15 символів';
-        return ''; // Пустий рядок означає, що помилок немає
+        return ''; 
     },
     email: (val) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -94,56 +88,57 @@ const validators = {
         
         const birthDate = new Date(val);
         const today = new Date();
-        // ОБОВ'ЯЗКОВО: обнуляємо години, хвилини, секунди для точного порівняння
         today.setHours(0, 0, 0, 0); 
         
-        // Перевірка на майбутнє
-        if (birthDate > today) {
-            return 'Дата не може бути у майбутньому';
-        }
+        if (birthDate > today) return 'Дата не може бути у майбутньому';
         
-        // Вираховуємо вік
         let age = today.getFullYear() - birthDate.getFullYear();
         const m = today.getMonth() - birthDate.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
             age--;
         }
         
-        // Перевірка на вік
-        if (age < 12) {
-            return 'Вам має бути більше 12 років для реєстрації';
-        }
-        
+        if (age < 12) return 'Вам має бути більше 12 років для реєстрації';
         return '';
     },
+    // ОСЬ ЦЯ ФУНКЦІЯ БУЛА ЗАГУБЛЕНА!
+    required: (val) => {
+        if (!val.trim()) return 'Це поле є обов\'язковим';
+        return '';
+    }
 };
 
-// Функція для відображення помилок на екрані
+// Більш надійна функція для відображення помилок
 const setFieldState = (input, errorMessage) => {
-    const errorDiv = input.parentElement.querySelector('.error-message');
+    // Шукаємо помилку не в parentElement, а вище - в .input-group
+    const errorDiv = input.closest('.input-group').querySelector('.error-message');
     
-    // Скидаємо попередні класи
     input.classList.remove('is-valid', 'is-invalid');
     
     if (errorMessage) {
         input.classList.add('is-invalid');
-        if(errorDiv) errorDiv.textContent = errorMessage;
-        return false; // Поле не валідне
+        if(errorDiv) {
+            errorDiv.textContent = errorMessage;
+            errorDiv.style.color = '#e74c3c'; // Червоний
+        }
+        return false; 
     } else {
         input.classList.add('is-valid');
-        if(errorDiv) errorDiv.textContent = '';
-        return true; // Поле валідне
+        if(errorDiv) {
+            errorDiv.textContent = 'Looks good!';
+            errorDiv.style.color = '#2ecc71'; // Зелений
+        }
+        return true; 
     }
 };
 
-// Обробка форми реєстрації (Signup)
+// Обробка форми реєстрації
 const signupForm = document.getElementById('signup-form');
 signupForm.addEventListener('submit', (e) => {
-    e.preventDefault(); // Зупиняємо перезавантаження сторінки
+    e.preventDefault(); 
     
     let isValid = true;
     
-    // Перевіряємо кожне поле
     const fNameValid = setFieldState(signupForm.firstName, validators.name(signupForm.firstName.value));
     const lNameValid = setFieldState(signupForm.lastName, validators.name(signupForm.lastName.value));
     const usernameValid = setFieldState(signupForm.username, validators.required(signupForm.username.value));
@@ -153,19 +148,21 @@ signupForm.addEventListener('submit', (e) => {
     const countryValid = setFieldState(signupForm.country, validators.required(signupForm.country.value));
     const cityValid = setFieldState(signupForm.city, validators.required(signupForm.city.value));
     
-    // Перевірка радіо кнопок (Стать)
+    // Перевірка радіо кнопок
     const sexRadios = signupForm.querySelectorAll('input[name="sex"]');
     let sexSelected = false;
     sexRadios.forEach(radio => { if (radio.checked) sexSelected = true; });
     const sexWrapper = sexRadios[0].closest('.input-group').querySelector('.error-message');
     if (!sexSelected) {
         sexWrapper.textContent = 'Оберіть стать';
+        sexWrapper.style.color = '#e74c3c';
         isValid = false;
     } else {
-        sexWrapper.textContent = '';
+        sexWrapper.textContent = 'Looks good!';
+        sexWrapper.style.color = '#2ecc71';
     }
 
-    // Перевірка паролів (повинні збігатися)
+    // Перевірка паролів
     const pass1 = signupForm.password.value;
     const pass2 = signupForm.confirmPassword.value;
     const pass1Valid = setFieldState(signupForm.password, validators.password(pass1));
@@ -175,15 +172,14 @@ signupForm.addEventListener('submit', (e) => {
     else if (!pass2) pass2Error = 'Підтвердіть пароль';
     const pass2Valid = setFieldState(signupForm.confirmPassword, pass2Error);
 
-    // Підсумкова перевірка
-    isValid = fNameValid && lNameValid && emailValid && phoneValid && dobValid && countryValid && cityValid && pass1Valid && pass2Valid && sexSelected;
+    isValid = fNameValid && lNameValid && usernameValid && emailValid && phoneValid && dobValid && countryValid && cityValid && pass1Valid && pass2Valid && sexSelected;
 
     if (isValid) {
         submitFormData(signupForm, 'успішно зареєстровано');
     }
 });
 
-// Обробка форми входу (Login)
+// Обробка форми входу
 const loginForm = document.getElementById('login-form');
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -196,31 +192,25 @@ loginForm.addEventListener('submit', (e) => {
     }
 });
 
-// Головна функція відправки (FormData)
 function submitFormData(formElement, successActionText) {
-    // Збираємо всі дані форми в один об'єкт (як вимагається в завданні)
     const formData = new FormData(formElement);
     
-    // Для перевірки можемо вивести зібрані дані в консоль
     console.log(`--- Дані форми ${formElement.id} ---`);
     for (let [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
     }
 
-    // Показуємо повідомлення про успіх
     const successMsg = document.getElementById('success-msg');
     successMsg.textContent = `Вас ${successActionText}!`;
     successMsg.classList.remove('hidden');
     
-    // Ховаємо повідомлення через 3 секунди і очищаємо форму
     setTimeout(() => {
         successMsg.classList.add('hidden');
-        formElement.reset(); // Очищаємо поля
+        formElement.reset(); 
         
-        // Знімаємо зелені рамки
-        formElement.querySelectorAll('.is-valid').forEach(el => el.classList.remove('is-valid'));
+        formElement.querySelectorAll('.is-valid, .is-invalid').forEach(el => el.classList.remove('is-valid', 'is-invalid'));
+        formElement.querySelectorAll('.error-message').forEach(el => el.textContent = '');
         
-        // Блокуємо назад поле вибору міста у реєстрації
         if(formElement.id === 'signup-form') document.getElementById('city').disabled = true;
     }, 3000);
 }

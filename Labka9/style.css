@@ -119,11 +119,6 @@ input.is-invalid, select.is-invalid {
     min-height: 15px; /* Чтобы форма не прыгала при появлении ошибки */
 }
 
-.is-valid + .error-message::after {
-    content: "Looks good!";
-    color: #2ecc71;
-}
-
 /* Обертка для пароля (с глазиком) */
 .password-wrapper {
     position: relative;
